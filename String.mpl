@@ -39,8 +39,8 @@
 "control.times"           use
 "control.when"            use
 "control.while"           use
-"control.write"           use
 "control.within"          use
+"control.write"           use
 "control.||"              use
 "conventions.cdecl"       use
 "memory.memcpy"           use

@@ -149,6 +149,7 @@ Process: [{
   kill: [
     "kill" assertCreated
     "posix.kill" use
+
     SIGKILL processId kill -1 = [
       "kill" 1 errorExit
     ] when
