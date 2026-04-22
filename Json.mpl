@@ -589,6 +589,18 @@ catJSONNodeWithPaddingImpl: [
     splitted: splitString;
     "\"" @result.cat
     [splitted.success new] "Wrong encoding in JSON string!" assert
+    escapeU16Hex: [
+      u: new;
+      "\\u" @result.cat
+      4 [
+        current: u 3 i - 4 * 0n32 cast rshift 0xFn32 and;
+        current 10n32 < [
+          ascii.zero current + @result.catAsciiSymbolCode
+        ] [
+          ascii.aCode current + 10n32 - @result.catAsciiSymbolCode
+        ] if
+      ] times
+    ];
     splitted.chars [
       symbol: new;
       code: symbol.data Nat32 cast;
@@ -621,16 +633,15 @@ catJSONNodeWithPaddingImpl: [
                       ] [
                         codePoint: size: symbol.data symbol.size getCodePointAndSize;;
                         [size 0 >] "Wrong encoding in splitted array!" assert
-                        [codePoint 0x10000n32 <] "Rare codepoint JSON string!" assert
-                        "\\u" @result.cat
-                        4 [
-                          current: codePoint 3 i - 4 * 0n32 cast rshift 0xFn32 and;
-                          current 10n32 < [
-                            ascii.zero current + @result.catAsciiSymbolCode
-                          ] [
-                            ascii.aCode current + 10n32 - @result.catAsciiSymbolCode
-                          ] if
-                        ] times
+                        codePoint 0x10000n32 < [
+                          codePoint escapeU16Hex
+                        ] [
+                          adjusted: codePoint 0x10000n32 -;
+                          high: adjusted 10n32 rshift 0xD800n32 +;
+                          low: adjusted 0x3FFn32 and 0xDC00n32 +;
+                          high escapeU16Hex
+                          low escapeU16Hex
+                        ] if
                       ] if
                     ] if
                   ] if
